@@ -291,6 +291,11 @@ static struct usb_serial_driver cp210x_device = {
 #define IOCTL_GPIOGET		0x8000
 #define IOCTL_GPIOSET		0x8001
 #define IOCTL_AUTO_GPIO_CTL     0x8002
+#define IOCTL_EVENTMASKGET	0x8003
+#define IOCTL_EVENTMASKSET	0x8004
+#define IOCTL_EVENTSTATEGET	0x8005
+#define IOCTL_COMMSTATUSGET	0x8006
+#define IOCTL_PURGE		0x8007
 
 static struct usb_serial_driver * const serial_drivers[] = {
 	&cp210x_device, NULL
@@ -660,7 +665,7 @@ static int cp210x_ioctl(struct tty_struct *tty,
 					&temp_cp2108_cfg, sizeof(struct quad_port_config), 300);
 
 			if (result != sizeof(struct quad_port_config)) {
-			        printk("ERROR get cp2108_cfg!\n");
+			        dev_err(dev, "ERROR get cp2108_cfg!\n");
 			        return -EIO;
 			}
 
@@ -671,19 +676,19 @@ static int cp210x_ioctl(struct tty_struct *tty,
 
                         if (arg) {
                                 temp_cp2108_cfg.EnhFxn_IFC0 |= (   EF_IFC_GPIO_TXLED |
-                                                                        EF_IFC_GPIO_RXLED |
-                                                                        EF_IFC_GPIO_RS485 |
-                                                                        EF_RS485_INVERT );
+                                                                   EF_IFC_GPIO_RXLED |
+                                                                   EF_IFC_GPIO_RS485 |
+                                                                   EF_RS485_INVERT );
 
                                 temp_cp2108_cfg.EnhFxn_IFC1 |= (   EF_IFC_GPIO_TXLED |
-                                                                        EF_IFC_GPIO_RXLED |
-                                                                        EF_IFC_GPIO_RS485 |
-                                                                        EF_RS485_INVERT );
+                                                                   EF_IFC_GPIO_RXLED |
+                                                                   EF_IFC_GPIO_RS485 |
+                                                                   EF_RS485_INVERT );
 
                                 temp_cp2108_cfg.EnhFxn_IFC2 |= (   EF_IFC_GPIO_TXLED |
-                                                                        EF_IFC_GPIO_RXLED |
-                                                                        EF_IFC_GPIO_RS485 |
-                                                                        EF_RS485_INVERT );
+                                                                   EF_IFC_GPIO_RXLED |
+                                                                   EF_IFC_GPIO_RS485 |
+                                                                   EF_RS485_INVERT );
                         } else {
                                 temp_cp2108_cfg.EnhFxn_IFC0 &= ~(  EF_IFC_GPIO_TXLED |
                                                                    EF_IFC_GPIO_RXLED |
@@ -702,7 +707,7 @@ static int cp210x_ioctl(struct tty_struct *tty,
                         }
 
 		        /* set */
-			usb_control_msg(port->serial->dev,
+			result = usb_control_msg(port->serial->dev,
 					usb_sndctrlpipe(port->serial->dev, 0),
 					CP210X_VENDOR_SPECIFIC,
 					REQTYPE_HOST_TO_DEVICE,
@@ -714,18 +719,56 @@ static int cp210x_ioctl(struct tty_struct *tty,
 			        dev_err(dev, "ERROR set cp2108_cfg!\n");
 			        return -EIO;
 			} else {
-        			printk("ONLY uarts 0,1 and 2 are set - uart 3 is left in old state!\n");
-        			printk("Reconnect power-supply to activate new configuration!\n");
+        			dev_dbg(dev, "ONLY uarts 0,1 and 2 are set - uart 3 is left in old state!\n");
+        			dev_dbg(dev, "Reconnect power-supply to activate new configuration!\n");
 			}
 		} else {
 			return -ENOTSUPP;
 		}
 		break;
+	case IOCTL_EVENTMASKGET:
+		result = cp210x_get_config(port, REQTYPE_INTERFACE_TO_HOST,
+				CP210X_GET_EVENTMASK,
+				0,
+				(unsigned int*)arg, 2);
+		dev_dbg(dev, "%s (CP210X_GET_EVENTMASK) - get_wait_mask = %04X"
+			, __func__, *(unsigned int*)arg);
+		break;
+	case IOCTL_EVENTMASKSET:	
+		result = cp210x_set_config(port, REQTYPE_HOST_TO_INTERFACE,
+			CP210X_SET_EVENTMASK, *(unsigned int*)arg, NULL, 0);
+		dev_dbg(dev, "%s (CP210X_SET_EVENTMASK) - set_wait_mask = %04X"
+			, __func__, *(unsigned int*)arg);
+		break;
+	case IOCTL_EVENTSTATEGET:
+		result = cp210x_get_config(port, REQTYPE_INTERFACE_TO_HOST,
+				CP210X_GET_EVENTSTATE,
+				0,
+				(unsigned int*)arg, 2);
+		dev_dbg(dev, "%s (CP210X_GET_EVENTSTATE) - event_state_get = %04X"
+			, __func__, *(unsigned int*)arg);
+		break;
+	case IOCTL_COMMSTATUSGET:
+		result = cp210x_get_config(port, REQTYPE_INTERFACE_TO_HOST,
+				CP210X_GET_COMM_STATUS,
+				0,
+				(unsigned int*)arg, 0x13);
+		dev_dbg(dev, "%s (P210X_GET_COMM_STATUS)", __func__);
+		break;
+	case IOCTL_PURGE:
+		result = cp210x_set_config(port, REQTYPE_HOST_TO_INTERFACE,
+				CP210X_PURGE,
+				*(unsigned int*)arg,
+				NULL, 0);
+		dev_dbg(dev, "%s (CP210X_PURGE) - purge_mask = %01X"
+			, __func__, *(unsigned int*)arg);
+		break;
 	default:
+		return -ENOIOCTLCMD;
 		break;
 	}
 
-	return -ENOIOCTLCMD;
+	return result;
 }
 
 /*
