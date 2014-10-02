@@ -755,7 +755,7 @@ static int cp210x_ioctl(struct tty_struct *tty,
 					&temp_cp2108_cfg, sizeof(struct quad_port_config), 300);
 
 			if (result != sizeof(struct quad_port_config)) {
-			        printk("ERROR get cp2108_cfg!\n");
+			        dev_err(dev, "ERROR get cp2108_cfg!\n");
 			        return -EIO;
 			}
 
@@ -797,7 +797,8 @@ static int cp210x_ioctl(struct tty_struct *tty,
                         }
 
 		        /* set */
-			usb_control_msg(serial->dev,
+			result = usb_control_msg(serial->dev,
+
 					usb_sndctrlpipe(port->serial->dev, 0),
 					CP210X_VENDOR_SPECIFIC,
 					REQTYPE_HOST_TO_DEVICE,
@@ -815,6 +816,35 @@ static int cp210x_ioctl(struct tty_struct *tty,
 		} else {
 			return -ENOTSUPP;
 		}
+		break;
+	case IOCTL_EVENTMASKGET:
+		result = cp210x_get_config(port, CP210X_GET_EVENTMASK,
+				(unsigned int*)arg, 2);
+		dev_dbg(dev, "%s (CP210X_GET_EVENTMASK) - get_wait_mask = %04X"
+			, __func__, *(unsigned int*)arg);
+		break;
+	case IOCTL_EVENTMASKSET:	
+		result = cp210x_set_config(port, CP210X_SET_EVENTMASK,
+		                (unsigned int*)arg, 2);
+		dev_dbg(dev, "%s (CP210X_SET_EVENTMASK) - set_wait_mask = %04X"
+			, __func__, *(unsigned int*)arg);
+		break;
+	case IOCTL_EVENTSTATEGET:
+		result = cp210x_get_config(port, CP210X_GET_EVENTSTATE,
+				(unsigned int*)arg, 2);
+		dev_dbg(dev, "%s (CP210X_GET_EVENTSTATE) - event_state_get = %04X"
+			, __func__, *(unsigned int*)arg);
+		break;
+	case IOCTL_COMMSTATUSGET:
+		result = cp210x_get_config(port, CP210X_GET_COMM_STATUS,
+				(unsigned int*)arg, 0x13);
+		dev_dbg(dev, "%s (P210X_GET_COMM_STATUS)", __func__);
+		break;
+	case IOCTL_PURGE:
+		result = cp210x_set_config(port, CP210X_PURGE, 
+		                (unsigned int*)arg, 2);
+		dev_dbg(dev, "%s (CP210X_PURGE) - purge_mask = %01X"
+			, __func__, *(unsigned int*)arg);
 		break;
 	default:
 		break;
