@@ -1,0 +1,470 @@
+/*
+ * Copyright (C) 2012 Texas Instruments Incorporated - http://www.ti.com/
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+/ {
+	aliases {
+		spi0 = &spi0;
+	};
+	
+	cpus {
+		cpu@0 {
+			cpu0-supply = <&dcdc2_reg>;
+		};
+	};
+
+	memory {
+		device_type = "memory";
+		reg = <0x80000000 0x10000000>; /* 256 MB */
+	};
+
+	panel: lcd_panel {
+		compatible = "ti,tilcdc,panel";
+	};
+	
+#ifdef TODO_OR_REMOVE
+	leds {
+		pinctrl-names = "default";
+		pinctrl-0 = <&user_leds_s0>;
+
+		compatible = "gpio-leds";
+
+		led@2 {
+			label = "beaglebone:green:heartbeat";
+			gpios = <&gpio1 21 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "heartbeat";
+			default-state = "off";
+		};
+
+		led@3 {
+			label = "beaglebone:green:mmc0";
+			gpios = <&gpio1 22 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "mmc0";
+			default-state = "off";
+		};
+
+		led@4 {
+			label = "beaglebone:green:usr2";
+			gpios = <&gpio1 23 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "cpu0";
+			default-state = "off";
+		};
+
+		led@5 {
+			label = "beaglebone:green:usr3";
+			gpios = <&gpio1 24 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "mmc1";
+			default-state = "off";
+		};
+	};
+#endif
+
+	vmmcsd_fixed: fixedregulator@0 {
+		compatible = "regulator-fixed";
+		regulator-name = "vmmcsd_fixed";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+	};
+};
+
+&am33xx_pinmux {
+	pinctrl-names = "default";
+	pinctrl-0 = <&clkout2_pin>;
+
+#ifdef TODO_OR_REMOVE
+	user_leds_s0: user_leds_s0 {
+		pinctrl-single,pins = <
+			0x54 (PIN_OUTPUT_PULLDOWN | MUX_MODE7)	/* gpmc_a5.gpio1_21 */
+			0x58 (PIN_OUTPUT_PULLUP | MUX_MODE7)	/* gpmc_a6.gpio1_22 */
+			0x5c (PIN_OUTPUT_PULLDOWN | MUX_MODE7)	/* gpmc_a7.gpio1_23 */
+			0x60 (PIN_OUTPUT_PULLUP | MUX_MODE7)	/* gpmc_a8.gpio1_24 */
+		>;
+	};
+#endif
+
+	i2c0_pins: pinmux_i2c0_pins { /* on module I2C at DHCOM */
+		pinctrl-single,pins = <
+			0x188 (PIN_INPUT_PULLUP | MUX_MODE0)	/* i2c0_sda.i2c0_sda */
+			0x18c (PIN_INPUT_PULLUP | MUX_MODE0)	/* i2c0_scl.i2c0_scl */
+		>;
+	};
+	
+	i2c2_pins: pinmux_i2c2_pins { /* I2C1 on DHCOM */
+		pinctrl-single,pins = <
+			0x178 (PIN_INPUT_PULLUP | MUX_MODE3)	/* uart1_ctsn.i2c2_sda */
+			0x17c (PIN_INPUT_PULLUP | MUX_MODE3)	/* uart1_rtsn.i2c2_scl */
+		>;
+	};
+
+	uart0_pins: pinmux_uart0_pins { /* UART1 on DHCOM */
+		pinctrl-single,pins = <
+			0x168 (PIN_INPUT_PULLUP | MUX_MODE0)	/* uart0_cts.uart0_cts */
+			0x16C (PIN_OUTPUT_PULLDOWN | MUX_MODE0)	/* uart0_rts.uart0_rts */
+			0x170 (PIN_INPUT_PULLUP | MUX_MODE0)	/* uart0_rxd.uart0_rxd */
+			0x174 (PIN_OUTPUT_PULLDOWN | MUX_MODE0)	/* uart0_txd.uart0_txd */
+		>;
+	};
+	
+	spi0_pins: pinmux_spi0_pins { /* Bootloader FLASH + SPI0 on DHCOM */
+		pinctrl-single,pins = <
+			0x150 (PIN_INPUT_PULLDOWN | MUX_MODE0)	/* spi0_sclk.spi0_sclk */
+			0x154 (PIN_INPUT_PULLUP | MUX_MODE0)	/* spi0_d0.spi0_d0 */
+			0x158 (PIN_INPUT_PULLDOWN | MUX_MODE0)	/* spi0_d1.spi0_d1 */
+			0x15C (PIN_OUTPUT_PULLUP | MUX_MODE0)	/* spi0_cs0.spi0_cs0 */
+			0x160 (PIN_OUTPUT_PULLUP | MUX_MODE0)	/* spi0_cs1.spi0_cs1 */
+		>;
+	};
+	
+	uart1_pins: pinmux_uart1_pins { /* UART2 on DHCOM */
+		pinctrl-single,pins = <
+			0x180 (PIN_INPUT_PULLUP | MUX_MODE0)	/* uart1_rxd.uart1_rxd */
+			0x184 (PIN_OUTPUT_PULLDOWN | MUX_MODE0)	/* uart1_txd.uart1_txd */
+		>;
+	};
+
+	clkout2_pin: pinmux_clkout2_pin {
+		pinctrl-single,pins = <
+			0x1b4 (PIN_OUTPUT_PULLDOWN | MUX_MODE3)	/* xdma_event_intr1.clkout2 */
+		>;
+	};
+
+	cpsw_default: cpsw_default {
+		pinctrl-single,pins = <
+			/* Slave 1 */
+			0x110 (PIN_INPUT_PULLUP | MUX_MODE0)	/* mii1_rxerr.mii1_rxerr */
+			0x114 (PIN_OUTPUT_PULLDOWN | MUX_MODE0)	/* mii1_txen.mii1_txen */
+			0x118 (PIN_INPUT_PULLUP | MUX_MODE0)	/* mii1_rxdv.mii1_rxdv */
+			0x11c (PIN_OUTPUT_PULLDOWN | MUX_MODE0)	/* mii1_txd3.mii1_txd3 */
+			0x120 (PIN_OUTPUT_PULLDOWN | MUX_MODE0)	/* mii1_txd2.mii1_txd2 */
+			0x124 (PIN_OUTPUT_PULLDOWN | MUX_MODE0)	/* mii1_txd1.mii1_txd1 */
+			0x128 (PIN_OUTPUT_PULLDOWN | MUX_MODE0)	/* mii1_txd0.mii1_txd0 */
+			0x12c (PIN_INPUT_PULLUP | MUX_MODE0)	/* mii1_txclk.mii1_txclk */
+			0x130 (PIN_INPUT_PULLUP | MUX_MODE0)	/* mii1_rxclk.mii1_rxclk */
+			0x134 (PIN_INPUT_PULLUP | MUX_MODE0)	/* mii1_rxd3.mii1_rxd3 */
+			0x138 (PIN_INPUT_PULLUP | MUX_MODE0)	/* mii1_rxd2.mii1_rxd2 */
+			0x13c (PIN_INPUT_PULLUP | MUX_MODE0)	/* mii1_rxd1.mii1_rxd1 */
+			0x140 (PIN_INPUT_PULLUP | MUX_MODE0)	/* mii1_rxd0.mii1_rxd0 */
+		>;
+	};
+
+	cpsw_sleep: cpsw_sleep {
+		pinctrl-single,pins = <
+			/* Slave 1 reset value */
+			0x110 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+			0x114 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+			0x118 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+			0x11c (PIN_INPUT_PULLDOWN | MUX_MODE7)
+			0x120 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+			0x124 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+			0x128 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+			0x12c (PIN_INPUT_PULLDOWN | MUX_MODE7)
+			0x130 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+			0x134 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+			0x138 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+			0x13c (PIN_INPUT_PULLDOWN | MUX_MODE7)
+			0x140 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+		>;
+	};
+
+	davinci_mdio_default: davinci_mdio_default {
+		pinctrl-single,pins = <
+			/* MDIO */
+			0x148 (PIN_INPUT_PULLUP | SLEWCTRL_FAST | MUX_MODE0)	/* mdio_data.mdio_data */
+			0x14c (PIN_OUTPUT_PULLUP | MUX_MODE0)			/* mdio_clk.mdio_clk */
+		>;
+	};
+
+	davinci_mdio_sleep: davinci_mdio_sleep {
+		pinctrl-single,pins = <
+			/* MDIO reset value */
+			0x148 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+			0x14c (PIN_INPUT_PULLDOWN | MUX_MODE7)
+		>;
+	};
+
+	mmc1_pins: pinmux_mmc1_pins { /* SD/µSD Interface on DHCOM */
+		pinctrl-single,pins = < /* Pullups via hardware */
+			0x1E8 (PIN_INPUT_PULLDOWN | MUX_MODE7) /* emu1.gpio3_8 - mmc0_cd */
+			0x100 (PIN_INPUT | MUX_MODE0) /* mmc0_clk.mmc0_clk */
+			0x104 (PIN_INPUT | MUX_MODE0) /* mmc0_cmd.mmc0_cmd */
+			0x0FC (PIN_INPUT | MUX_MODE0) /* mmc0_dat0.mmc0_dat0 */
+			0x0F8 (PIN_INPUT | MUX_MODE0) /* mmc0_dat1.mmc0_dat1 */
+			0x0F4 (PIN_INPUT | MUX_MODE0) /* mmc0_dat2.mmc0_dat2 */
+			0x0F0 (PIN_INPUT | MUX_MODE0) /* mmc0_dat3.mmc0_dat3 */
+		>;
+	};
+
+	emmc_pins: pinmux_emmc_pins { /* eMMC interface on DHCOM */
+		pinctrl-single,pins = < /* Pullups via hardware */
+			0x80 (PIN_INPUT | MUX_MODE2) /* gpmc_csn1.mmc1_clk */
+			0x84 (PIN_INPUT | MUX_MODE2) /* gpmc_csn2.mmc1_cmd */
+			0x00 (PIN_INPUT | MUX_MODE1) /* gpmc_ad0.mmc1_dat0 */
+			0x04 (PIN_INPUT | MUX_MODE1) /* gpmc_ad1.mmc1_dat1 */
+			0x08 (PIN_INPUT | MUX_MODE1) /* gpmc_ad2.mmc1_dat2 */
+			0x0c (PIN_INPUT | MUX_MODE1) /* gpmc_ad3.mmc1_dat3 */
+			0x10 (PIN_INPUT | MUX_MODE1) /* gpmc_ad4.mmc1_dat4 */
+			0x14 (PIN_INPUT | MUX_MODE1) /* gpmc_ad5.mmc1_dat5 */
+			0x18 (PIN_INPUT | MUX_MODE1) /* gpmc_ad6.mmc1_dat6 */
+			0x1c (PIN_INPUT | MUX_MODE1) /* gpmc_ad7.mmc1_dat7 */
+		>;
+	};
+
+	lcd_pins: pinmux_lcd {
+		pinctrl-single,pins = <
+			0xa0 (PIN_OUTPUT | MUX_MODE0)	/* lcd_data0.lcd_data0 */
+			0xa4 (PIN_OUTPUT | MUX_MODE0)	/* lcd_data1.lcd_data1 */
+			0xa8 (PIN_OUTPUT | MUX_MODE0)	/* lcd_data2.lcd_data2 */
+			0xac (PIN_OUTPUT | MUX_MODE0)	/* lcd_data3.lcd_data3 */
+			0xb0 (PIN_OUTPUT | MUX_MODE0)	/* lcd_data4.lcd_data4 */
+			0xb4 (PIN_OUTPUT | MUX_MODE0)	/* lcd_data5.lcd_data5 */
+			0xb8 (PIN_OUTPUT | MUX_MODE0)	/* lcd_data6.lcd_data6 */
+			0xbc (PIN_OUTPUT | MUX_MODE0)	/* lcd_data7.lcd_data7 */
+			0xc0 (PIN_OUTPUT | MUX_MODE0)	/* lcd_data8.lcd_data8 */
+			0xc4 (PIN_OUTPUT | MUX_MODE0)	/* lcd_data9.lcd_data9 */
+			0xc8 (PIN_OUTPUT | MUX_MODE0)	/* lcd_data10.lcd_data10 */
+			0xcc (PIN_OUTPUT | MUX_MODE0)	/* lcd_data11.lcd_data11 */
+			0xd0 (PIN_OUTPUT | MUX_MODE0)	/* lcd_data12.lcd_data12 */
+			0xd4 (PIN_OUTPUT | MUX_MODE0)	/* lcd_data13.lcd_data13 */
+			0xd8 (PIN_OUTPUT | MUX_MODE0)	/* lcd_data14.lcd_data14 */
+			0xdc (PIN_OUTPUT | MUX_MODE0)	/* lcd_data15.lcd_data15 */
+			0x20 (PIN_OUTPUT | MUX_MODE1)	/* gpmc_ad8.lcd_data16 */
+			0x24 (PIN_OUTPUT | MUX_MODE1)	/* gpmc_ad9.lcd_data17 */
+			0x28 (PIN_OUTPUT | MUX_MODE1)	/* gpmc_ad10.lcd_data18 */
+			0x2c (PIN_OUTPUT | MUX_MODE1)	/* gpmc_ad11.lcd_data19 */
+			0x30 (PIN_OUTPUT | MUX_MODE1)	/* gpmc_ad12.lcd_data20 */
+			0x34 (PIN_OUTPUT | MUX_MODE1)	/* gpmc_ad13.lcd_data21 */
+			0x38 (PIN_OUTPUT | MUX_MODE1)	/* gpmc_ad14.lcd_data22 */
+			0x3c (PIN_OUTPUT | MUX_MODE1)	/* gpmc_ad15.lcd_data23 */
+			0xe0 (PIN_OUTPUT | MUX_MODE0)	/* lcd_vsync.lcd_vsync */
+			0xe4 (PIN_OUTPUT | MUX_MODE0)	/* lcd_hsync.lcd_hsync */
+			0xe8 (PIN_OUTPUT | MUX_MODE0)	/* lcd_pclk.lcd_pclk */
+			0xec (PIN_OUTPUT | MUX_MODE0)	/* lcd_ac_bias_en.lcd_ac_bias_en */
+			/* Display Enable */
+			0x194 (PIN_OUTPUT_PULLUP | MUX_MODE7)	/* mcasp0_fsx.gpio3_15 */
+		>;
+	};
+};
+
+/* Display: 24-bit LCD Screen */
+&panel {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&lcd_pins>;
+	panel-info {
+		ac-bias = <255>;
+		ac-bias-intrpt = <0>;
+		dma-burst-sz = <16>;
+		bpp = <32>;
+		fdd = <0x80>;
+		sync-edge = <0>;
+		sync-ctrl = <1>;
+		raster-order = <0>;
+		fifo-th = <0>;
+	};
+	display-timings {
+		native-mode = <&timing0>;
+		timing0: 800x480 {
+			clock-frequency = <22200000>;
+			hactive = <800>;
+			vactive = <480>;
+			hfront-porch = <42>;
+			hback-porch = <86>;
+			hsync-len = <64>;
+			vfront-porch = <10>;
+			vback-porch = <33>;
+			vsync-len = <2>;
+			hsync-active = <0>;
+			vsync-active = <0>;
+		};
+	};
+};
+
+&lcdc {
+	status = "okay";
+};
+
+&uart0 { /* UART1 on DHCOM */
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart0_pins>;
+
+	status = "okay";
+};
+
+&uart1 { /* UART2 on DHCOM */
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart1_pins>;
+
+	status = "okay";
+};
+
+&usb {
+	status = "okay";
+};
+
+&usb_ctrl_mod {
+	status = "okay";
+};
+
+&usb0_phy { /* DHCOM USB OTG */
+	status = "okay";
+};
+
+&usb1_phy { /* DHCOM USB HOST 1 */
+	status = "okay";
+};
+
+&usb0 { /* DHCOM USB OTG */
+	status = "okay";
+	dr_mode = "peripheral";
+};
+
+&usb1 { /* DHCOM USB HOST 1 */
+	status = "okay";
+	dr_mode = "host";
+};
+
+&cppi41dma  {
+	status = "okay";
+};
+
+&spi0 { 
+        #address-cells     = <1>;
+        #size-cells     = <0>;
+        pinctrl-names = "default";
+        pinctrl-0 = <&spi0_pins>;
+        status = "okay";
+
+        s25fl216k@0 { // Bootloader Flash: Spansion S25FL116K0PMFI010 (used to store bootloader)
+                #address-cells = <1>;
+                #size-cells = <1>;
+                compatible = "spansion,s25fl216k", "m25p80";
+                spi-max-frequency = <48000000>;
+                reg = <0>; /* chip select 0 */
+                m25p,fast-read;
+        };
+        
+        spidev0: spi@1{ /* DHCOM SPI 1 */
+                #address-cells = <1>;
+                #size-cells = <0>;
+                compatible = "spidev";
+                reg = <1>; /* chip select 1 */
+                spi-max-frequency = <16000000>;
+                // spi-cpha; /* Shifted clock phase (CPHA) mode */
+                // spi-cpol; /* Inverse clock polarity (CPOL) mode */
+        };
+};
+
+&i2c0 { /* on module I2C at DHCOM */
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c0_pins>;
+
+	status = "okay";
+	clock-frequency = <400000>;
+
+	tps: tps@24 {
+		reg = <0x24>; /* i2c address */
+	};
+
+        rtc_rv3029: rtc@56 { /* Micro Crystal RV-3029-C3 (onModule) */
+                device_type = "rtc";
+                compatible = "microc,rtc-rv3029c3", "microc,rtc-rv3029c2";
+                reg = <0x56>; /* i2c address */
+                interrupt-parent = <&gpio3>;
+                interrupts = <18 2>; /* 2 = high to low edge triggered */
+                status = "okay";
+        };
+
+};
+
+&i2c2 { /* I2C1 on DHCOM */
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c2_pins>;
+
+	status = "okay";
+	clock-frequency = <400000>;
+};
+
+/include/ "tps65217.dtsi"
+
+&tps {
+	regulators {
+		dcdc1_reg: regulator@0 {
+			regulator-name = "vdds_dpr";
+			regulator-always-on;
+		};
+
+		dcdc2_reg: regulator@1 {
+			/* VDD_MPU voltage limits 0.95V - 1.26V with +/-4% tolerance */
+			regulator-name = "vdd_mpu";
+			regulator-min-microvolt = <925000>;
+			regulator-max-microvolt = <1325000>;
+			regulator-boot-on;
+			regulator-always-on;
+		};
+
+		dcdc3_reg: regulator@2 {
+			/* VDD_CORE voltage limits 0.95V - 1.1V with +/-4% tolerance */
+			regulator-name = "vdd_core";
+			regulator-min-microvolt = <925000>;
+			regulator-max-microvolt = <1150000>;
+			regulator-boot-on;
+			regulator-always-on;
+		};
+
+		ldo1_reg: regulator@3 {
+			regulator-name = "vio,vrtc,vdds";
+			regulator-always-on;
+		};
+
+		ldo2_reg: regulator@4 {
+			regulator-name = "vdd_3v3aux";
+			regulator-always-on;
+		};
+
+		ldo3_reg: regulator@5 {
+			regulator-name = "vdd_1v8";
+			regulator-always-on;
+		};
+
+		ldo4_reg: regulator@6 {
+			regulator-name = "vdd_3v3a";
+			regulator-always-on;
+		};
+	};
+};
+
+&cpsw_emac0 {
+	phy_id = <&davinci_mdio>, <0>;
+	phy-mode = "rmii";
+};
+
+&cpsw_emac1 {
+	phy_id = <&davinci_mdio>, <1>;
+	phy-mode = "rmii";
+};
+
+&mac {
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&cpsw_default>;
+	pinctrl-1 = <&cpsw_sleep>;
+	status = "okay";
+};
+
+&davinci_mdio {
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&davinci_mdio_default>;
+	pinctrl-1 = <&davinci_mdio_sleep>;
+	status = "okay";
+};
+
+&mmc1 {
+	status = "okay";
+	bus-width = <0x4>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&mmc1_pins>;
+	cd-gpios = <&gpio3 8 GPIO_ACTIVE_HIGH>;
+};
