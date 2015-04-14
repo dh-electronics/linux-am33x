@@ -135,19 +135,23 @@
 	cpsw_default: cpsw_default {
 		pinctrl-single,pins = <
 			/* Slave 1 */
-			0x110 (PIN_INPUT_PULLUP | MUX_MODE0)	/* mii1_rxerr.mii1_rxerr */
-			0x114 (PIN_OUTPUT_PULLDOWN | MUX_MODE0)	/* mii1_txen.mii1_txen */
-			0x118 (PIN_INPUT_PULLUP | MUX_MODE0)	/* mii1_rxdv.mii1_rxdv */
-			0x11c (PIN_OUTPUT_PULLDOWN | MUX_MODE0)	/* mii1_txd3.mii1_txd3 */
-			0x120 (PIN_OUTPUT_PULLDOWN | MUX_MODE0)	/* mii1_txd2.mii1_txd2 */
-			0x124 (PIN_OUTPUT_PULLDOWN | MUX_MODE0)	/* mii1_txd1.mii1_txd1 */
-			0x128 (PIN_OUTPUT_PULLDOWN | MUX_MODE0)	/* mii1_txd0.mii1_txd0 */
-			0x12c (PIN_INPUT_PULLUP | MUX_MODE0)	/* mii1_txclk.mii1_txclk */
-			0x130 (PIN_INPUT_PULLUP | MUX_MODE0)	/* mii1_rxclk.mii1_rxclk */
-			0x134 (PIN_INPUT_PULLUP | MUX_MODE0)	/* mii1_rxd3.mii1_rxd3 */
-			0x138 (PIN_INPUT_PULLUP | MUX_MODE0)	/* mii1_rxd2.mii1_rxd2 */
-			0x13c (PIN_INPUT_PULLUP | MUX_MODE0)	/* mii1_rxd1.mii1_rxd1 */
-			0x140 (PIN_INPUT_PULLUP | MUX_MODE0)	/* mii1_rxd0.mii1_rxd0 */
+			0x110 (PIN_INPUT_PULLUP | MUX_MODE1)	/* mii1_rxerr.rmii1_rxerr */
+			0x114 (PIN_OUTPUT_PULLDOWN | MUX_MODE1)	/* mii1_txen.rmii1_txen */
+			0x10C (PIN_INPUT_PULLUP | MUX_MODE1)	/* mii1_crs.rmii1_crs_dv */
+			0x124 (PIN_OUTPUT_PULLDOWN | MUX_MODE1)	/* mii1_txd1.rmii1_txd1 */
+			0x128 (PIN_OUTPUT_PULLDOWN | MUX_MODE1)	/* mii1_txd0.rmii1_txd0 */
+			0x13c (PIN_INPUT_PULLUP | MUX_MODE1)	/* mii1_rxd1.rmii1_rxd1 */
+			0x140 (PIN_INPUT_PULLUP | MUX_MODE1)	/* mii1_rxd0.rmii1_rxd0 */
+			0x144 (PIN_INPUT_PULLUP | MUX_MODE0)	/* rmii1_ref_clk.rmii1_ref_clk */
+			/* Slave 2 */
+			0x074 (PIN_INPUT_PULLUP | MUX_MODE3)	/* gpmc_wpn.rmii2_rxerr */
+			0x040 (PIN_OUTPUT_PULLDOWN | MUX_MODE3)	/* gpmc_a0.rmii2_txen */
+			0x088 (PIN_INPUT_PULLUP | MUX_MODE2)	/* gpmc_csn3.rmii2_crs_dv */
+			0x050 (PIN_OUTPUT_PULLDOWN | MUX_MODE3)	/* gpmc_a4.rmii2_txd1 */
+			0x054 (PIN_OUTPUT_PULLDOWN | MUX_MODE3)	/* gpmc_a5.rmii2_txd0 */
+			0x068 (PIN_INPUT_PULLUP | MUX_MODE3)	/* gpmc_a10.rmii2_rxd1 */
+			0x06c (PIN_INPUT_PULLUP | MUX_MODE3)	/* gpmc_a11.rmii2_rxd0 */
+			0x108 (PIN_INPUT_PULLUP | MUX_MODE1)	/* mii1_col.rmii2_ref_clk */
 		>;
 	};
 
@@ -156,17 +160,21 @@
 			/* Slave 1 reset value */
 			0x110 (PIN_INPUT_PULLDOWN | MUX_MODE7)
 			0x114 (PIN_INPUT_PULLDOWN | MUX_MODE7)
-			0x118 (PIN_INPUT_PULLDOWN | MUX_MODE7)
-			0x11c (PIN_INPUT_PULLDOWN | MUX_MODE7)
-			0x120 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+			0x10C (PIN_INPUT_PULLDOWN | MUX_MODE7)
 			0x124 (PIN_INPUT_PULLDOWN | MUX_MODE7)
 			0x128 (PIN_INPUT_PULLDOWN | MUX_MODE7)
-			0x12c (PIN_INPUT_PULLDOWN | MUX_MODE7)
-			0x130 (PIN_INPUT_PULLDOWN | MUX_MODE7)
-			0x134 (PIN_INPUT_PULLDOWN | MUX_MODE7)
-			0x138 (PIN_INPUT_PULLDOWN | MUX_MODE7)
 			0x13c (PIN_INPUT_PULLDOWN | MUX_MODE7)
 			0x140 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+			0x144 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+			/* Slave 2 reset value */
+			0x074 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+			0x040 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+			0x088 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+			0x050 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+			0x054 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+			0x068 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+			0x06c (PIN_INPUT_PULLDOWN | MUX_MODE7)
+			0x108 (PIN_INPUT_PULLDOWN | MUX_MODE7)
 		>;
 	};
 
@@ -247,6 +255,14 @@
 			0x194 (PIN_OUTPUT_PULLUP | MUX_MODE7)	/* mcasp0_fsx.gpio3_15 */
 		>;
 	};
+	
+	usb1_host_pins: pinmux_usb1_host {
+		pinctrl-single,pins = <
+			/* MDIO reset value */
+			0x043 (PIN_OUTPUT_PULLDOWN | MUX_MODE0) /* usb1_drvvbus.usb1_drvvbus */
+			0x118 (PIN_INPUT_PULLDOWN | MUX_MODE7) /* mii1_rx_dv.gpio3_6 -> usb1_oc */
+		>;
+	};
 };
 
 /* Display: 24-bit LCD Screen */
@@ -319,10 +335,11 @@
 
 &usb0 { /* DHCOM USB OTG */
 	status = "okay";
-	dr_mode = "peripheral";
 };
 
 &usb1 { /* DHCOM USB HOST 1 */
+	pinctrl-names = "default";
+	pinctrl-0 = <&usb1_host_pins>;
 	status = "okay";
 	dr_mode = "host";
 };
@@ -388,6 +405,10 @@
 	clock-frequency = <400000>;
 };
 
+&rtc {
+	status = "disabled";
+};
+
 /include/ "tps65217.dtsi"
 
 &tps {
@@ -447,10 +468,15 @@
 	phy-mode = "rmii";
 };
 
+&phy_sel {
+	rmii-clock-ext;
+};
+
 &mac {
 	pinctrl-names = "default", "sleep";
 	pinctrl-0 = <&cpsw_default>;
 	pinctrl-1 = <&cpsw_sleep>;
+	dual_emac = <1>;
 	status = "okay";
 };
 
