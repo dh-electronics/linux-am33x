@@ -398,7 +398,7 @@ static int rv3029c2_probe(struct i2c_client *client,
 	int rc = 0;
 	u8 buf[1];
 
-	if (!i2c_check_functionality(client->adapter, I2C_FUNC_SMBUS_EMUL))
+        if (!i2c_check_functionality(client->adapter, (I2C_FUNC_SMBUS_EMUL & ~I2C_FUNC_SMBUS_QUICK)))
 		return -ENODEV;
 
 	rc = rv3029c2_i2c_get_sr(client, buf);
