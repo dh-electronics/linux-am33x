@@ -258,9 +258,15 @@
 	
 	usb1_host_pins: pinmux_usb1_host {
 		pinctrl-single,pins = <
-			/* MDIO reset value */
-			0x043 (PIN_OUTPUT_PULLDOWN | MUX_MODE0) /* usb1_drvvbus.usb1_drvvbus */
-			0x118 (PIN_INPUT_PULLDOWN | MUX_MODE7) /* mii1_rx_dv.gpio3_6 -> usb1_oc */
+			/* DHCOM USB Host 1 Over Current detection */
+			0x118 (PIN_INPUT_PULLUP | MUX_MODE7) /* mii1_rx_dv.gpio3_6 */
+		>;
+	};
+
+	rtc0_int_pins: pinmux_rtc0_interrupt {
+		pinctrl-single,pins = <
+			/* DHCOM USB Host 1 Over Current detection */
+			0x1A0 (PIN_INPUT_PULLUP | MUX_MODE7) /* mcasp0_aclkr.gpio3_18 */
 		>;
 	};
 };
@@ -338,8 +344,6 @@
 };
 
 &usb1 { /* DHCOM USB HOST 1 */
-	pinctrl-names = "default";
-	pinctrl-0 = <&usb1_host_pins>;
 	status = "okay";
 	dr_mode = "host";
 };
@@ -387,6 +391,8 @@
 	};
 
         rtc_rv3029: rtc@56 { /* Micro Crystal RV-3029-C3 (onModule) */
+                pinctrl-names = "default";
+                pinctrl-0 = <&rtc0_int_pins>;
                 device_type = "rtc";
                 compatible = "microc,rtc-rv3029c3", "microc,rtc-rv3029c2";
                 reg = <0x56>; /* i2c address */
