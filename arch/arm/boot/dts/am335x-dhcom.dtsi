@@ -90,6 +90,8 @@
 		pinctrl-single,pins = <
 			0x188 (PIN_INPUT_PULLUP | MUX_MODE0)	/* i2c0_sda.i2c0_sda */
 			0x18c (PIN_INPUT_PULLUP | MUX_MODE0)	/* i2c0_scl.i2c0_scl */
+			/* RTC interrupt gpio */
+			0x1A0 (PIN_INPUT_PULLUP | MUX_MODE7) /* mcasp0_aclkr.gpio3_18 */
 		>;
 	};
 	
@@ -262,13 +264,6 @@
 			0x118 (PIN_INPUT_PULLUP | MUX_MODE7) /* mii1_rx_dv.gpio3_6 */
 		>;
 	};
-
-	rtc0_int_pins: pinmux_rtc0_interrupt {
-		pinctrl-single,pins = <
-			/* DHCOM USB Host 1 Over Current detection */
-			0x1A0 (PIN_INPUT_PULLUP | MUX_MODE7) /* mcasp0_aclkr.gpio3_18 */
-		>;
-	};
 };
 
 /* Display: 24-bit LCD Screen */
@@ -379,6 +374,10 @@
         };
 };
 
+&rtc { /* Disable SoC RTC */
+	status = "disabled";
+};
+
 &i2c0 { /* on module I2C at DHCOM */
 	pinctrl-names = "default";
 	pinctrl-0 = <&i2c0_pins>;
@@ -390,17 +389,14 @@
 		reg = <0x24>; /* i2c address */
 	};
 
-        rtc_rv3029: rtc@56 { /* Micro Crystal RV-3029-C3 (onModule) */
-                pinctrl-names = "default";
-                pinctrl-0 = <&rtc0_int_pins>;
-                device_type = "rtc";
+        rv3029: rtc@56 { /* Micro Crystal RV-3029-C3 (onModule) */
                 compatible = "microc,rtc-rv3029c3", "microc,rtc-rv3029c2";
+                device_type = "rtc";
                 reg = <0x56>; /* i2c address */
                 interrupt-parent = <&gpio3>;
                 interrupts = <18 2>; /* 2 = high to low edge triggered */
                 status = "okay";
         };
-
 };
 
 &i2c2 { /* I2C1 on DHCOM */
@@ -409,10 +405,6 @@
 
 	status = "okay";
 	clock-frequency = <400000>;
-};
-
-&rtc {
-	status = "disabled";
 };
 
 /include/ "tps65217.dtsi"
