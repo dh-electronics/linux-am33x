@@ -8,11 +8,20 @@
 /dts-v1/;
 
 #include "am33xx.dtsi"
+#include <dt-bindings/pwm/pwm.h>
 #include "am335x-dhcom.dtsi"
 
 / {
 	model = "DHCOM AM335x";
 	compatible = "ti,am335x-dhcom", "ti,am33xx";
+
+	backlight {
+		compatible = "pwm-backlight";
+		pwms = <&ehrpwm0 0 50000 PWM_POLARITY_INVERTED>;
+		brightness-levels = <0 58 61 66 75 90 125 170 255>;
+		default-brightness-level = <8>;
+		enable-gpios = <&gpio3 15 0>;
+	};
 };
 
 &ldo3_reg {
@@ -46,6 +55,24 @@
 			0x14 (PIN_INPUT | MUX_MODE1) /* gpmc_ad5.mmc1_dat5 */
 			0x18 (PIN_INPUT | MUX_MODE1) /* gpmc_ad6.mmc1_dat6 */
 			0x1c (PIN_INPUT | MUX_MODE1) /* gpmc_ad7.mmc1_dat7 */
+		>;
+	};
+};
+
+&epwmss0 {
+	status = "okay";
+};
+
+&ehrpwm0 { /* DHCOM PWM for Backlight */
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&ehrpwm0_pins>;
+};
+
+&am33xx_pinmux {
+	ehrpwm0_pins: backlight_pins {
+		pinctrl-single,pins = <
+			0x190 (PIN_OUTPUT_PULLDOWN | MUX_MODE1)	/* mcasp0_aclkx.ehrpwm0a MODE1 */
 		>;
 	};
 };
