@@ -36,11 +36,27 @@
 
 &am33xx_pinmux {
 	pinctrl-names = "default";
-	pinctrl-0 = <&clkout2_pin>;
+	pinctrl-0 = <&dhcom_gpio_pins>;
 
-	clkout2_pin: pinmux_clkout2_pin {
+	dhcom_gpio_pins: pinmux_dhcom_gpio_pins {
 		pinctrl-single,pins = <
-			0x1b4 (PIN_OUTPUT_PULLDOWN | MUX_MODE3)	/* xdma_event_intr1.clkout2 */
+			0x1b4 (PIN_INPUT | MUX_MODE7)	/* xdma_event_intr1.gpio0_20 - GPIO A */
+			0x1a4 (PIN_INPUT | MUX_MODE7)	/* mcasp0_fsr.gpio3_19 - GPIO B */
+			0x1a8 (PIN_INPUT | MUX_MODE7)	/* mcasp0_axr1.gpio3_20 - GPIO C */
+			0x08c (PIN_INPUT | MUX_MODE7)	/* gpmc_clk.gpio2_1 - GPIO D */
+			0x21c (PIN_INPUT | MUX_MODE7)	/* usb0_drvvbus.gpio0_18 - GPIO E */
+			0x198 (PIN_INPUT | MUX_MODE7)	/* mcasp0_axr0.gpio3_16 - GPIO F */
+			// 0x194 (PIN_INPUT | MUX_MODE7) /* mcasp0_fsx.gpio3_15 - GPIO G - used for backlight enable  */
+			0x164 (PIN_INPUT | MUX_MODE7)	/* ecap0_in_pwm0_out.gpio0_7 - GPIO H */
+			0x19c (PIN_INPUT | MUX_MODE7)	/* mcasp0_ahclkr.gpio3_17 - GPIO I */
+			0x1ac (PIN_INPUT | MUX_MODE7)	/* mcasp0_ahclkx.gpio3_21 - GPIO J */
+			0x064 (PIN_INPUT | MUX_MODE7)	/* gpmc_a9.gpio1_25 - GPIO K */
+			0x060 (PIN_INPUT | MUX_MODE7)	/* gpmc_a8.gpio1_24 - GPIO L */
+			0x05c (PIN_INPUT | MUX_MODE7)	/* gpmc_a7.gpio1_23 - GPIO M */
+			0x058 (PIN_INPUT | MUX_MODE7)	/* gpmc_a6.gpio1_22 - GPIO N */
+			0x044 (PIN_INPUT | MUX_MODE7)	/* gpmc_a3.gpio1_19 - GPIO O */
+			0x048 (PIN_INPUT | MUX_MODE7)	/* gpmc_a2.gpio1_18 - GPIO P */
+			0x04c (PIN_INPUT | MUX_MODE7)	/* gpmc_a1.gpio1_17 - GPIO Q */
 		>;
 	};
 };
@@ -439,7 +455,7 @@
 			0xe8 (PIN_OUTPUT | MUX_MODE0)	/* lcd_pclk.lcd_pclk */
 			0xec (PIN_OUTPUT | MUX_MODE0)	/* lcd_ac_bias_en.lcd_ac_bias_en */
 			/* Display Enable */
-			0x194 (PIN_OUTPUT_PULLUP | MUX_MODE7)	/* mcasp0_fsx.gpio3_15 */
+			0x194 (PIN_OUTPUT_PULLUP | MUX_MODE7)	/* mcasp0_fsx.gpio3_15 (DHCOM GPIO G)*/
 		>;
 	};
 };
