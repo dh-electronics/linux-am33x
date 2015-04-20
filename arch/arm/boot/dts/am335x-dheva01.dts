@@ -59,6 +59,16 @@
 	};
 };
 
+&i2c2 { /* Devices on DHCOM I2C1 */
+        tmg120_ts@20 {
+                compatible = "dh,tmg120_ts";
+                reg = <0x20>;
+                interrupt-parent = <&gpio0>;
+                interrupts = <7 2>;
+                status = "okay";
+        };
+};
+
 &epwmss0 {
 	status = "okay";
 };
