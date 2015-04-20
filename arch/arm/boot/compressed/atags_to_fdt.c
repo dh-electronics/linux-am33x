@@ -112,7 +112,8 @@ int atags_to_fdt(void *atag_list, void *fdt, int total_space)
 	 * address and size for each bank */
 	uint32_t mem_reg_property[2 * 2 * NR_BANKS];
 	int memcount = 0;
-	int ret, memsize;
+	int memsize = 0;
+	int ret;
 
 	/* make sure we've got an aligned pointer */
 	if ((u32)atag_list & 0x3)
