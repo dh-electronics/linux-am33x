@@ -44,7 +44,7 @@
 			0x1a4 (PIN_INPUT | MUX_MODE7)	/* mcasp0_fsr.gpio3_19 - GPIO B */
 			0x1a8 (PIN_INPUT | MUX_MODE7)	/* mcasp0_axr1.gpio3_20 - GPIO C */
 			0x08c (PIN_INPUT | MUX_MODE7)	/* gpmc_clk.gpio2_1 - GPIO D */
-			0x21c (PIN_INPUT | MUX_MODE7)	/* usb0_drvvbus.gpio0_18 - GPIO E */
+			0x1A0 (PIN_INPUT | MUX_MODE7)   /* mcasp0_aclkr.gpio3_18 - GPIO E */
 			0x198 (PIN_INPUT | MUX_MODE7)	/* mcasp0_axr0.gpio3_16 - GPIO F */
 			// 0x194 (PIN_INPUT | MUX_MODE7) /* mcasp0_fsx.gpio3_15 - GPIO G - used for backlight enable  */
 			0x164 (PIN_INPUT | MUX_MODE7)	/* ecap0_in_pwm0_out.gpio0_7 - GPIO H */
@@ -189,8 +189,8 @@
                 compatible = "microc,rtc-rv3029c3", "microc,rtc-rv3029c2";
                 device_type = "rtc";
                 reg = <0x56>; /* i2c address */
-                interrupt-parent = <&gpio3>;
-                interrupts = <18 2>; /* 2 = high to low edge triggered */
+                interrupt-parent = <&gpio1>;
+                interrupts = <28 2>; /* 2 = high to low edge triggered */
                 status = "okay";
         };
 };
@@ -209,7 +209,7 @@
 			0x188 (PIN_INPUT_PULLUP | MUX_MODE0)	/* i2c0_sda.i2c0_sda */
 			0x18c (PIN_INPUT_PULLUP | MUX_MODE0)	/* i2c0_scl.i2c0_scl */
 			/* RTC interrupt gpio */
-			0x1A0 (PIN_INPUT_PULLUP | MUX_MODE7) /* mcasp0_aclkr.gpio3_18 */
+			0x078 (PIN_INPUT_PULLUP | MUX_MODE7) /* mcasp0_aclkr.gpio3_18 */
 		>;
 	};
 
