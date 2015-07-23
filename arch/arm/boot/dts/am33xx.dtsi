@@ -746,11 +746,13 @@
 			cpsw_emac0: slave@4a100200 {
 				/* Filled in by U-Boot */
 				mac-address = [ 00 00 00 00 00 00 ];
+				dual_emac_res_vlan = <1>;
 			};
 
 			cpsw_emac1: slave@4a100300 {
 				/* Filled in by U-Boot */
 				mac-address = [ 00 00 00 00 00 00 ];
+				dual_emac_res_vlan = <2>;
 			};
 
 			phy_sel: cpsw-phy-sel@44e10650 {
