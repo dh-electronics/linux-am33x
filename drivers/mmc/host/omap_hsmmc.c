@@ -1878,6 +1878,7 @@ static struct omap_hsmmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
 {
 	struct omap_hsmmc_platform_data *pdata;
 	struct device_node *np = dev->of_node;
+	int ret;
 
 	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
 	if (!pdata)
@@ -1889,6 +1890,14 @@ static struct omap_hsmmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
 	pdata->gpio_cd = -EINVAL;
 	pdata->gpio_cod = -EINVAL;
 	pdata->gpio_wp = -EINVAL;
+
+        ret = of_alias_get_id(np, "mmcblk");
+        if (ret < 0) {
+                dev_err(dev, "failed to get alias id, errno %d\n", ret);
+                pdata->devidx = 0xFF;
+        }
+
+        pdata->devidx = ret;
 
 	if (of_find_property(np, "ti,non-removable", NULL)) {
 		pdata->nonremovable = true;
@@ -1978,6 +1987,9 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
 	ret = omap_hsmmc_gpio_init(mmc, host, pdata);
 	if (ret)
 		goto err_gpio;
+
+	/* copy mmc block device index */
+        host->mmc->devidx = mmc_pdata(host)->devidx;
 
 	platform_set_drvdata(pdev, host);
 

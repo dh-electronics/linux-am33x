@@ -39,7 +39,7 @@ struct omap_mmc_platform_data {
 
 	/* Register offset deviation */
 	u16 reg_offset;
-
+	
 	struct omap_mmc_slot_data {
 
 		/*
@@ -116,6 +116,7 @@ struct omap_mmc_platform_data {
 		int (*card_detect)(struct device *dev, int slot);
 
 		unsigned int ban_openended:1;
-
+		unsigned int devidx;
+		
 	} slots[OMAP_MMC_MAX_SLOTS];
 };
