@@ -80,7 +80,7 @@ static int __initdata mtd_devs;
 static struct mtd_dev_param __initdata mtd_dev_param[UBI_MAX_DEVICES];
 #ifdef CONFIG_MTD_UBI_FASTMAP
 /* UBI module parameter to enable fastmap automatically on non-fastmap images */
-static bool fm_autoconvert;
+static bool fm_autoconvert = true;
 static bool fm_debug;
 #endif
 
