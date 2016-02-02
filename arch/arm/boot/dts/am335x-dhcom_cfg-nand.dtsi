@@ -1,0 +1,88 @@
+/*
+ * Copyright 2016 DH electronics GmbH
+ *
+ * The code contained herein is licensed under the GNU General Public
+ * License. You may obtain a copy of the GNU General Public License
+ * Version 2 or later at the following locations:
+ *
+ * http://www.opensource.org/licenses/gpl-license.html
+ * http://www.gnu.org/copyleft/gpl.html
+ */
+
+&mmc2 { /* disable DHCOM on module emmc */
+	status = "disable";
+};
+
+&elm {
+	status = "okay";
+};
+
+&gpmc {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&dhcom_gpmc_pins>;
+        
+        /* ranges is not used at recent kernel versions:
+         * - calulate values drived from the contents 
+         *   of the per-CS register CPMC_CONFIG7 (set by bootloader) */
+	ranges = <0 0 0x08000000 0x20000000>; /* CS0: NAND */
+	
+	nand@0,0 {
+		reg = <0 0 0>;		/* CS0, offset 0 */
+		ti,nand-ecc-opt = "bch8";
+		/* 2016-02-02: "prefetch-dma" is not supported by mainline kernel */
+		ti,nand-xfer-type = "prefetch-polled";
+		nand-on-flash-bbt;
+		ti,elm-id = <&elm>;
+		nand-bus-width = <8>;
+		gpmc,device-width = <1>;
+		
+		/* default timings from devitree bindings doc */
+		gpmc,sync-clk-ps = <0>;
+		gpmc,cs-on-ns = <0>;
+		gpmc,cs-rd-off-ns = <44>;
+		gpmc,cs-wr-off-ns = <44>;
+		gpmc,adv-on-ns = <6>;
+		gpmc,adv-rd-off-ns = <34>;
+		gpmc,adv-wr-off-ns = <44>;
+		gpmc,we-off-ns = <40>;
+		gpmc,oe-off-ns = <54>;
+		gpmc,access-ns = <64>;
+		gpmc,rd-cycle-ns = <82>;
+		gpmc,wr-cycle-ns = <82>;
+		gpmc,wr-access-ns = <40>;
+		gpmc,wr-data-mux-bus-ns = <0>;
+		
+		/* MTD partition table */
+		#address-cells = <2>;
+		#size-cells = <2>;
+		partition@0 { /* 8 GiB partition (it's ok if chip is smaller) */
+			label = "gpmc-nand";
+			reg = <0x0 0x00000000 0x2 0x00000000>;
+		};
+	};
+};
+
+&am33xx_pinmux {
+	dhcom_gpmc_pins: dhcom_gpmc_pins {
+		pinctrl-single,pins = <
+		        0x7c (PIN_OUTPUT | MUX_MODE0)		/* gpmc_csn0.gpmc_csn0 - NAND_CE*/
+			0x90 (PIN_OUTPUT | MUX_MODE0)		/* gpmc_advn_ale.gpmc_advn_ale - NAND_ALE */
+			0x94 (PIN_OUTPUT | MUX_MODE0)		/* gpmc_oen_ren.gpmc_oen_ren - NAND_RE */
+			0x98 (PIN_OUTPUT | MUX_MODE0)		/* gpmc_wen.gpmc_wen - NAND_WE */
+			0x9c (PIN_OUTPUT | MUX_MODE0)		/* gpmc_ben0_cle.gpmc_ben0_cle - NAND_CLE*/
+		        0x70 (PIN_INPUT_PULLUP | MUX_MODE0)	/* gpmc_wait0.gpmc_wait0 - NAND_RB */
+		        /* WP is used for the second ethernet port */
+		        /* 0x74 (PIN_OUTPUT | MUX_MODE0) */     /* gpmc_wpn.gpmc_wpn - NAND_WP */
+					        
+			0x0 (PIN_INPUT_PULLUP | MUX_MODE0)	/* gpmc_ad0.gpmc_ad0 */
+			0x4 (PIN_INPUT_PULLUP | MUX_MODE0)	/* gpmc_ad1.gpmc_ad1 */
+			0x8 (PIN_INPUT_PULLUP | MUX_MODE0)	/* gpmc_ad2.gpmc_ad2 */
+			0xc (PIN_INPUT_PULLUP | MUX_MODE0)	/* gpmc_ad3.gpmc_ad3 */
+			0x10 (PIN_INPUT_PULLUP | MUX_MODE0)	/* gpmc_ad4.gpmc_ad4 */
+			0x14 (PIN_INPUT_PULLUP | MUX_MODE0)	/* gpmc_ad5.gpmc_ad5 */
+			0x18 (PIN_INPUT_PULLUP | MUX_MODE0)	/* gpmc_ad6.gpmc_ad6 */
+			0x1c (PIN_INPUT_PULLUP | MUX_MODE0)	/* gpmc_ad7.gpmc_ad7 */
+		>;
+	};
+};
