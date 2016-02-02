@@ -86,3 +86,6 @@
 		>;
 	};
 };
+
+// Enables NAND, disables eMMC
+// #include "am335x-dhcom_cfg-nand.dtsi"
