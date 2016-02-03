@@ -114,6 +114,8 @@
 };
 
 &usb1 { /* DHCOM USB HOST 1 */
+	pinctrl-names = "default";
+	pinctrl-0 = <&usb1_host_pins>;
 	status = "okay";
 	dr_mode = "host";
 };
@@ -127,6 +129,7 @@
 		pinctrl-single,pins = <
 			/* DHCOM USB Host 1 Over Current detection */
 			0x118 (PIN_INPUT_PULLUP | MUX_MODE7) /* mii1_rx_dv.gpio3_6 */
+			0x234 (PIN_OUTPUT_PULLDOWN | MUX_MODE0) /* usb1_drvvbus.usb1_drvvbus */
 		>;
 	};
 };
