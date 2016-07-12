@@ -141,15 +141,12 @@
         pinctrl-0 = <&spi0_pins>;
         status = "okay";
 
-        s25fl216k@0 { // Bootloader Flash: Spansion S25FL116K0PMFI010 (used to store bootloader)
-                #address-cells = <1>;
-                #size-cells = <1>;
-                compatible = "spansion,s25fl216k", "m25p80";
-                spi-max-frequency = <48000000>;
-                reg = <0>; /* chip select 0 */
-                m25p,fast-read;
-        };
-        
+        /*
+         * attention: important to probe "spidev" before bootloader flash
+         * - driver does disable know chipselect lines.
+         * - when probing first device than second chipselect has still
+         *   configuration which was set by the bootloader
+         */
         spidev0: spi@1{ /* DHCOM SPI 1 */
                 #address-cells = <1>;
                 #size-cells = <1>;
@@ -158,6 +155,15 @@
                 spi-max-frequency = <16000000>;
                 // spi-cpha; /* Shifted clock phase (CPHA) mode */
                 // spi-cpol; /* Inverse clock polarity (CPOL) mode */
+        };
+
+        s25fl216k@0 { // Bootloader Flash: Spansion S25FL116K0PMFI010 (used to store bootloader)
+                #address-cells = <1>;
+                #size-cells = <1>;
+                compatible = "spansion,s25fl216k", "m25p80";
+                spi-max-frequency = <48000000>;
+                reg = <0>; /* chip select 0 */
+                m25p,fast-read;
         };
 };
 
