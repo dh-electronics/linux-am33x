@@ -32,6 +32,19 @@
 		regulator-min-microvolt = <3300000>;
 		regulator-max-microvolt = <3300000>;
 	};
+	
+        gpio_keys: wkup_key@0 {
+                compatible = "gpio-keys";
+                #address-cells = <1>;
+                #size-cells = <0>;
+
+                switch@1 {
+                        label = "buttonwakeup";
+                        linux,code = <0x102>;
+                        gpios = <&gpio0 20 GPIO_ACTIVE_LOW>;
+                        gpio-key,wakeup;
+                };
+        };
 };
 
 &am33xx_pinmux {
@@ -179,10 +192,6 @@
 	};
 };
 
-&rtc { /* Disable SoC RTC */
-	status = "disabled";
-};
-
 &i2c0 { /* on module I2C at DHCOM */
 	pinctrl-names = "default";
 	pinctrl-0 = <&i2c0_pins>;
@@ -200,7 +209,7 @@
                 reg = <0x56>; /* i2c address */
                 interrupt-parent = <&gpio1>;
                 interrupts = <28 2>; /* 2 = high to low edge triggered */
-                status = "okay";
+                status = "disable";
         };
 };
 
@@ -408,7 +417,7 @@
 		sync-edge = <0>;
 		sync-ctrl = <1>;
 		raster-order = <0>;
-		fifo-th = <0>;
+		fifo-th = <6>;
 	};
 	display-timings {
 		native-mode = <&timing0>;
@@ -497,4 +506,22 @@
 			0x120 (PIN_INPUT | MUX_MODE1)	/* mii_txd2.dcan0_tx */
 		>;
 	};
+};
+
+
+&aes {
+	status = "okay";
+};
+
+&sham {
+	status = "okay";
+};
+
+&wkup_m3_ipc {
+	ti,scale-data-fw = "am335x-bone-scale-data.bin";
+};
+
+&rtc {  /* SoC RTC */
+	system-power-controller;
+	status = "okay";
 };
