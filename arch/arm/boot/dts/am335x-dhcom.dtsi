@@ -209,7 +209,7 @@
                 reg = <0x56>; /* i2c address */
                 interrupt-parent = <&gpio1>;
                 interrupts = <28 2>; /* 2 = high to low edge triggered */
-                status = "disable";
+                status = "okay";
         };
 };
 
@@ -561,6 +561,5 @@
 };
 
 &rtc {  /* SoC RTC */
-	system-power-controller;
-	status = "okay";
+	status = "disabled";
 };
