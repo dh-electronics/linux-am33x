@@ -199,10 +199,6 @@
 	status = "okay";
 	clock-frequency = <400000>;
 
-	tps: tps@24 {
-		reg = <0x24>; /* i2c address */
-	};
-
         rv3029: rtc@56 { /* Micro Crystal RV-3029-C3 (onModule) */
                 compatible = "microc,rtc-rv3029c3", "microc,rtc-rv3029c2";
                 device_type = "rtc";
