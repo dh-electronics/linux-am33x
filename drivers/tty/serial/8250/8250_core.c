@@ -988,6 +988,11 @@ int serial8250_register_8250_port(struct uart_8250_port *up)
 		uart->port.unthrottle	= up->port.unthrottle;
 		uart->port.rs485_config	= up->port.rs485_config;
 		uart->port.rs485	= up->port.rs485;
+		uart->em485		= up->em485;
+		uart->rts_gpio		= up->rts_gpio;
+		uart->rts_gpio_valid	= up->rts_gpio_valid;
+		uart->rxen_gpio		= up->rxen_gpio;
+		uart->rxen_gpio_valid   = up->rxen_gpio_valid;
 		uart->dma		= up->dma;
 
 		/* Take tx_loadsz from fifosize if it wasn't set separately */

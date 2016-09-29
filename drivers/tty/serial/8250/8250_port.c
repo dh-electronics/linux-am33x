@@ -37,6 +37,8 @@
 #include <linux/slab.h>
 #include <linux/uaccess.h>
 #include <linux/pm_runtime.h>
+#include <linux/gpio.h>
+#include <linux/of_gpio.h>
 #include <linux/timer.h>
 
 #include <asm/io.h>
@@ -507,13 +509,26 @@ static void serial8250_clear_fifos(struct uart_8250_port *p)
 
 static inline void serial8250_em485_rts_after_send(struct uart_8250_port *p)
 {
-	unsigned char mcr = serial_in(p, UART_MCR);
+	unsigned char mcr;
 
-	if (p->port.rs485.flags & SER_RS485_RTS_AFTER_SEND)
-		mcr |= UART_MCR_RTS;
-	else
-		mcr &= ~UART_MCR_RTS;
-	serial_out(p, UART_MCR, mcr);
+	if (!p->rts_gpio_valid) {
+		/* handle rs485 with dedicated rts */
+		mcr = serial_in(p, UART_MCR);
+
+		if (p->port.rs485.flags & SER_RS485_RTS_AFTER_SEND) {
+			mcr |= UART_MCR_RTS;
+		} else {
+			mcr &= ~UART_MCR_RTS;
+		}
+		serial_out(p, UART_MCR, mcr);
+	} else {
+		/* handle rs485 with gpio rts */
+		if (p->port.rs485.flags & SER_RS485_RTS_AFTER_SEND) {
+			gpio_set_value(p->rts_gpio, 1);
+		} else {
+			gpio_set_value(p->rts_gpio, 0);
+		}
+	}
 }
 
 static void serial8250_em485_handle_start_tx(unsigned long arg);
@@ -1385,8 +1400,14 @@ static void __do_stop_tx_rs485(struct uart_8250_port *p)
 	 * Empty the RX FIFO, we are not interested in anything
 	 * received during the half-duplex transmission.
 	 */
-	if (!(p->port.rs485.flags & SER_RS485_RX_DURING_TX))
+	if (!(p->port.rs485.flags & SER_RS485_RX_DURING_TX)) {
+
+		/* Enable RX: gpio == low */
+		if (p->rxen_gpio_valid)
+			gpio_set_value(p->rxen_gpio, 0);
+
 		serial8250_clear_fifos(p);
+	}
 }
 
 static void serial8250_em485_handle_stop_tx(unsigned long arg)
@@ -1451,6 +1472,7 @@ static inline void __stop_tx(struct uart_8250_port *p)
 		del_timer(&em485->start_tx_timer);
 		em485->active_timer = NULL;
 	}
+
 	__do_stop_tx(p);
 	__stop_tx_rs485(p);
 }
@@ -1507,20 +1529,39 @@ static inline void start_tx_rs485(struct uart_port *port)
 	struct uart_8250_em485 *em485 = up->em485;
 	unsigned char mcr;
 
-	if (!(up->port.rs485.flags & SER_RS485_RX_DURING_TX))
+	if (!(up->port.rs485.flags & SER_RS485_RX_DURING_TX)) {
 		serial8250_stop_rx(&up->port);
+		/* Disable RX: gpio == high */
+		if (up->rxen_gpio_valid)
+			gpio_set_value(up->rxen_gpio, 1);
+	}
 
 	del_timer(&em485->stop_tx_timer);
 	em485->active_timer = NULL;
 
 	mcr = serial_in(up, UART_MCR);
-	if (!!(up->port.rs485.flags & SER_RS485_RTS_ON_SEND) !=
-	    !!(mcr & UART_MCR_RTS)) {
+	if ((!!(up->port.rs485.flags & SER_RS485_RTS_ON_SEND) !=
+	    !!(mcr & UART_MCR_RTS)) && !up->rts_gpio_valid ) {
 		if (up->port.rs485.flags & SER_RS485_RTS_ON_SEND)
 			mcr |= UART_MCR_RTS;
 		else
 			mcr &= ~UART_MCR_RTS;
 		serial_out(up, UART_MCR, mcr);
+
+		if (up->port.rs485.delay_rts_before_send > 0) {
+			em485->active_timer = &em485->start_tx_timer;
+			mod_timer(&em485->start_tx_timer, jiffies +
+				up->port.rs485.delay_rts_before_send * HZ / 1000);
+			return;
+		}
+	} else if ((!!(up->port.rs485.flags & SER_RS485_RTS_ON_SEND) !=
+	    !!(gpio_get_value(up->rts_gpio))) && up->rts_gpio_valid) {
+
+		/* enable TX (if required) */
+		if (up->port.rs485.flags & SER_RS485_RTS_ON_SEND)
+			gpio_set_value(up->rts_gpio, 1);
+		else
+			gpio_set_value(up->rts_gpio, 0);
 
 		if (up->port.rs485.delay_rts_before_send > 0) {
 			em485->active_timer = &em485->start_tx_timer;

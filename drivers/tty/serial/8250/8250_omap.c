@@ -1160,6 +1160,85 @@ static const struct of_device_id omap8250_dt_ids[] = {
 };
 MODULE_DEVICE_TABLE(of, omap8250_dt_ids);
 
+int omap8250_probe_rs485(struct uart_8250_port *up,
+		struct device *dev)
+{
+	struct serial_rs485 rs485conf = up->port.rs485;
+	struct device_node *np = dev->of_node;
+	u32 rs485_delay[2];
+	enum of_gpio_flags flags;
+	int ret;
+
+	up->rts_gpio_valid = false;
+	up->rxen_gpio_valid = false;
+	rs485conf.flags = 0;
+
+	if (!np)
+		return 0;
+
+	/* check for tx enable gpio */
+	up->rts_gpio = of_get_named_gpio_flags(np, "rts-gpio", 0, &flags);
+	if (up->rts_gpio == -EPROBE_DEFER)
+		return -EPROBE_DEFER;
+	if (!gpio_is_valid(up->rts_gpio))
+		return 0;
+
+	ret = devm_gpio_request(dev, up->rts_gpio, "rs485_txen");
+	if (ret < 0)
+		return ret;
+
+	/* initial state == disable transmitting */
+	ret = gpio_direction_output(up->rts_gpio, (flags & OF_GPIO_ACTIVE_LOW));
+	if (ret < 0)
+		return ret;
+
+	up->rts_gpio_valid = true;
+
+	/* check for rx enable gpio */
+	up->rxen_gpio = of_get_named_gpio_flags(np, "rxen-gpio", 0, &flags);
+	if (up->rxen_gpio != -EPROBE_DEFER) {
+		if (!gpio_is_valid(up->rxen_gpio))
+			return 0;
+
+		ret = devm_gpio_request(dev, up->rxen_gpio, "rs485_rxen");
+		if (ret < 0)
+			return ret;
+
+		/* initial state == enable receiving */
+		ret = gpio_direction_output(up->rxen_gpio, !(flags & OF_GPIO_ACTIVE_LOW));
+		if (ret < 0)
+			return ret;
+
+		up->rxen_gpio_valid = true;
+	}
+
+	if (of_property_read_bool(np, "rs485-rts-active-high"))
+		rs485conf.flags |= SER_RS485_RTS_ON_SEND;
+	else
+		rs485conf.flags |= SER_RS485_RTS_AFTER_SEND;
+
+	if (of_property_read_u32_array(np, "rs485-rts-delay",
+				rs485_delay, 2) == 0) {
+		rs485conf.delay_rts_before_send = rs485_delay[0];
+		rs485conf.delay_rts_after_send = rs485_delay[1];
+	}
+
+	if (of_property_read_bool(np, "rs485-rx-during-tx"))
+		rs485conf.flags |= SER_RS485_RX_DURING_TX;
+
+
+	if (of_property_read_bool(np, "linux,rs485-enabled-at-boot-time"))
+		rs485conf.flags |= SER_RS485_ENABLED;
+
+        dev_dbg(dev, "RS485 RTS GPIO : %d is valid: %d\n", up->rts_gpio, up->rts_gpio_valid);
+        dev_dbg(dev, "RS485 RXen GPIO: %d is valid: %d\n", up->rxen_gpio, up->rxen_gpio_valid);
+
+	omap_8250_rs485_config(&up->port, &rs485conf);
+
+	return 0;
+}
+EXPORT_SYMBOL_GPL(omap8250_probe_rs485);
+
 static int omap8250_probe(struct platform_device *pdev)
 {
 	struct resource *regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
@@ -1304,6 +1383,11 @@ static int omap8250_probe(struct platform_device *pdev)
 		}
 	}
 #endif
+
+	if (of_get_property(pdev->dev.of_node, "8250,rs485-mode", NULL)) {
+                 omap8250_probe_rs485(&up, &pdev->dev);
+        }
+
 	ret = serial8250_register_8250_port(&up);
 	if (ret < 0) {
 		dev_err(&pdev->dev, "unable to register 8250 port\n");
@@ -1311,6 +1395,7 @@ static int omap8250_probe(struct platform_device *pdev)
 	}
 	priv->line = ret;
 	platform_set_drvdata(pdev, priv);
+
 	pm_runtime_mark_last_busy(&pdev->dev);
 	pm_runtime_put_autosuspend(&pdev->dev);
 	return 0;
