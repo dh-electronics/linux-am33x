@@ -847,7 +847,7 @@ static int cp210x_ioctl(struct tty_struct *tty,
 			, __func__, *(unsigned int*)arg);
 		break;
 	default:
-		break;
+                return -ENOIOCTLCMD;
         }
 
         return result;
