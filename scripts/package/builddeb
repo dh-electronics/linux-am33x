@@ -118,7 +118,7 @@ parisc|mips|powerpc)
 	installed_image_path="boot/vmlinux-$version"
 	;;
 *)
-	installed_image_path="boot/vmlinuz-$version"
+	installed_image_path="boot/$KBUILD_IMAGE"
 esac
 
 BUILD_DEBUG="$(grep -s '^CONFIG_DEBUG_INFO=y' $KCONFIG_CONFIG || true)"
@@ -140,6 +140,8 @@ if [ "$ARCH" = "um" ] ; then
 else
 	cp System.map "$tmpdir/boot/System.map-$version"
 	cp $KCONFIG_CONFIG "$tmpdir/boot/config-$version"
+	mkdir -p "$tmpdir/boot/dtbs"
+	cp -r arch/$ARCH/boot/dts/$SERIES*dhcom*.dtb "$tmpdir/boot/dtbs/"
 fi
 # Not all arches include the boot path in KBUILD_IMAGE
 if [ -e $KBUILD_IMAGE ]; then
@@ -148,12 +150,12 @@ else
 	cp arch/$ARCH/boot/$KBUILD_IMAGE "$tmpdir/$installed_image_path"
 fi
 
-if grep -q "^CONFIG_OF=y" $KCONFIG_CONFIG ; then
+#if grep -q "^CONFIG_OF=y" $KCONFIG_CONFIG ; then
 	# Only some architectures with OF support have this target
-	if grep -q dtbs_install "${srctree}/arch/$SRCARCH/Makefile"; then
-		$MAKE KBUILD_SRC= INSTALL_DTBS_PATH="$tmpdir/usr/lib/$packagename" dtbs_install
-	fi
-fi
+	#if grep -q dtbs_install "${srctree}/arch/$SRCARCH/Makefile"; then
+		#$MAKE KBUILD_SRC= INSTALL_DTBS_PATH="$tmpdir/usr/lib/$packagename" dtbs_install
+	#fi
+#fi
 
 if grep -q '^CONFIG_MODULES=y' $KCONFIG_CONFIG ; then
 	INSTALL_MOD_PATH="$tmpdir" $MAKE KBUILD_SRC= modules_install
